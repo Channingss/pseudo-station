@@ -1,0 +1,55 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECharts map Demo</title>
+</head>
+<body>
+
+<div id="main" style="height: 500px;">
+    <!-- 这里以后是地图 -->
+</div>
+
+</body>
+<script src="{% static "js/echarts.js" %}"></script>
+<script src="{% static "js/bmap.min.js" %}"></script>
+<script src="{% static "js/jquery-3.2.1/jquery-3.2.1.js" %}" type="text/javascript"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=53oVIOgmSIejwV7EfphPgTynOZbIiVYu"></script>
+<script>
+    var uploadedDataURL = "{% static "data/20170223_heatmap.json"%}";
+
+$.getJSON(uploadedDataURL, function(data) {
+    var option= ({
+        animation: false,
+        bmap: {
+            center: [116.36,39.9],
+            zoom: 12,
+            roam: true
+        },
+        visualMap: {
+            show: false,
+            top: 'top',
+            min: 0,
+            max: 30,
+            seriesIndex: 0,
+            calculable: true,
+            inRange: {
+                color: ['blue', 'blue', 'green', 'yellow', 'red']
+            }
+        },
+        series: [{
+            type: 'heatmap',
+            coordinateSystem: 'bmap',
+            data: data,
+            pointSize: 5,
+            blurSize: 6
+        }]
+    });
+
+    var myChart = echarts.init(document.getElementById('main'));
+    myChart.setOption(option);
+});
+</script>
+
+</html>

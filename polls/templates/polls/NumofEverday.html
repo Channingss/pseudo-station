@@ -1,0 +1,130 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECharts map Demo</title>
+</head>
+<body>
+
+<div id="main" style="height: 500px;">
+    <!-- 这里以后是地图 -->
+</div>
+
+</body>
+<script src="{% static "js/echarts.js" %}"></script>
+<script src="{% static "js/bmap.min.js" %}"></script>
+<script src="{% static "js/jquery-3.2.1/jquery-3.2.1.js" %}" type="text/javascript"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=53oVIOgmSIejwV7EfphPgTynOZbIiVYu"></script>
+<script>
+    var uploadedDataURL = "{% static "data/numMesOfEverday.json"%}";
+    $.getJSON(uploadedDataURL,function (data) {
+        dataofYYMMDD=data.map(function (time) {
+            year = time[0].toString().slice(0,4);
+            mouth = time[0].toString().slice(4,6);
+            day = time[0].toString().slice(6,8);
+
+            date =year+'-'+mouth+'-'+day;
+
+            return [date,time[1]];
+
+        });
+    option = {
+        backgroundColor: '#404a59',
+
+        title: {
+            top: 30,
+            text: '受伪基站感染数目',
+            subtext: '',
+            left: 'center',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        tooltip : {
+            trigger: 'item'
+        },
+        legend: {
+            top: '30',
+            left: '100',
+            data:['步数', 'Top 12'],
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        calendar: [{
+            top: 100,
+            left: 'center',
+            range: ['2017-02-23', '2017-04-25'],
+            width:400,
+            height:300,
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: '#000',
+                    width: 4,
+                    type: 'solid'
+                }
+            },
+            yearLabel: {
+                formatter: '{start}  1st',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: '#323c48',
+                    borderWidth: 1,
+                    borderColor: '#111'
+                }
+            }
+        }],
+        series : [
+            {
+                name: '数量',
+                type: 'scatter',
+                coordinateSystem: 'calendar',
+                data: dataofYYMMDD,
+                symbolSize: function (val) {
+                    return val[1] / 5000;
+                },
+                itemStyle: {
+                    normal: {
+                        color: '#ddb926'
+                    }
+                }
+            },
+
+            {
+                name: 'Top 10',
+                type: 'effectScatter',
+                coordinateSystem: 'calendar',
+                data: dataofYYMMDD.sort(function (a, b) {
+                    return b[1] - a[1];
+                }).slice(0, 10),
+                symbolSize: function (val) {
+                    return val[1] / 5000;
+                },
+                showEffectOn: 'render',
+                rippleEffect: {
+                    brushType: 'stroke'
+                },
+                hoverAnimation: true,
+                itemStyle: {
+                    normal: {
+                        color: '#f4e925',
+                        shadowBlur: 10,
+                        shadowColor: '#333'
+                    }
+                },
+                zlevel: 1
+            }
+        ]
+    };
+            var myChart = echarts.init(document.getElementById('main'));
+            myChart.setOption(option);
+    })
+</script>
+
+</html>

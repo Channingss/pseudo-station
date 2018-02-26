@@ -1,0 +1,425 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>感染&时间可视化demo</title>
+</head>
+<body>
+
+<div id="numofeverday" style="height: 500px;">
+    <!-- 这里以后是 -->
+</div>
+<div id="numofhour" style="height: 500px;">
+    <!-- 这里以后是 -->
+</div>
+<div id="numofhourineverday" style="height: 500px;">
+    <!-- 这里以后是 -->
+</div>
+</body>
+<script src="{% static "js/echarts.js" %}"></script>
+<script src="{% static "js/bmap.min.js" %}"></script>
+<script src="{% static "js/jquery-3.2.1/jquery-3.2.1.js" %}" type="text/javascript"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=53oVIOgmSIejwV7EfphPgTynOZbIiVYu"></script>
+<script class="numofeverday">
+    var uploadedDataURL = "{% static "data/numMesOfEverday.json"%}";
+    $.getJSON(uploadedDataURL,function (data) {
+        dataofYYMMDD=data.map(function (time) {
+            year = time[0].toString().slice(0,4);
+            mouth = time[0].toString().slice(4,6);
+            day = time[0].toString().slice(6,8);
+
+            date =year+'-'+mouth+'-'+day;
+
+            return [date,time[1]];
+
+        });
+    option = {
+        backgroundColor: '#404a59',
+
+        title: {
+            top: 30,
+            text: '受伪基站感染数目',
+            subtext: '',
+            left: 'center',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        tooltip : {
+            trigger: 'item'
+        },
+        legend: {
+            top: '30',
+            left: '100',
+            data:['步数', 'Top 12'],
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        calendar: [{
+            top: 100,
+            left: 'center',
+            range: ['2017-02-23', '2017-04-25'],
+            width:400,
+            height:300,
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: '#000',
+                    width: 4,
+                    type: 'solid'
+                }
+            },
+            yearLabel: {
+                formatter: '{start}',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: '#323c48',
+                    borderWidth: 1,
+                    borderColor: '#111'
+                }
+            }
+        }],
+        series : [
+            {
+                name: '数量',
+                type: 'scatter',
+                coordinateSystem: 'calendar',
+                data: dataofYYMMDD,
+                symbolSize: function (val) {
+                    return val[1] / 5000;
+                },
+                itemStyle: {
+                    normal: {
+                        color: '#ddb926'
+                    }
+                }
+            },
+
+            {
+                name: 'Top 10',
+                type: 'effectScatter',
+                coordinateSystem: 'calendar',
+                data: dataofYYMMDD.sort(function (a, b) {
+                    return b[1] - a[1];
+                }).slice(0, 15),
+                symbolSize: function (val) {
+                    return val[1] / 5000;
+                },
+                showEffectOn: 'render',
+                rippleEffect: {
+                    brushType: 'stroke'
+                },
+                hoverAnimation: true,
+                itemStyle: {
+                    normal: {
+                        color: '#f4e925',
+                        shadowBlur: 10,
+                        shadowColor: '#333'
+                    }
+                },
+                zlevel: 1
+            }
+        ]
+    };
+            var myChart = echarts.init(document.getElementById('numofeverday'));
+            myChart.setOption(option);
+    })
+</script>
+
+<script class="numofhour">
+    var uploadedDataURL = "{% static "data/numMesOfHour_Sum.json"%}";
+
+$.getJSON(uploadedDataURL, function(data) {
+   data=data.map(function (time) {
+
+            return {
+                name:time[0]+'~'+(time[0]+1),
+                value:time[1]
+       }
+        });
+option = {
+    title : {
+        text: '受伪基站感染数目',
+
+        x:'center'
+    },
+    tooltip: {
+        trigger: 'item',
+        position: ['48.5%', '49.2%'],
+        backgroundColor: 'rgba(50,50,50,0)',
+        textStyle : {
+            color: 'yellow',
+            fontWeight: 'bold'
+        },
+        formatter: "{d}%"
+    },
+    series : [
+        {
+            name: '上网时间',
+            type: 'pie',
+            radius : ['5%', '70%'],
+            roseType: 'area',
+            color:['#3fa7dc'],
+            data:data,
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            label: {
+                normal: {
+                    show: false
+                }
+            },
+            itemStyle: {
+                normal: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                },
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        },
+        {
+            name: '',
+            type: 'gauge',
+            min: 0,
+            max: 24,
+            startAngle: 90,
+            endAngle: 449.9,
+            radius: '82%',
+            splitNumber: 24,
+            clockwise: false,
+            animation: false,
+            detail: {
+                formatter: '{value}',
+                textStyle: {
+                    color: '#63869e'
+                }
+            },
+            detail:{
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                lineStyle: {
+                    color: [
+                        [0.25, '#63869e'],
+                        [0.75, '#ffffff'],
+                        [1, '#63869e']
+                    ],
+                    width: '40%',
+                    shadowColor: '#0d4b81', //默认透明
+                    shadowBlur: 40,
+                    opacity: 1
+                }
+            },
+            splitLine: {
+                length: 5,
+                lineStyle: {
+                    color: '#ffffff',
+                    width: 2
+                }
+            },
+            axisLabel: {
+                formatter: function(v){
+                    return v?v:'';
+                },
+                textStyle: {
+                    color: "red",
+                    fontWeight: 700
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: 'green',
+                    width: 2
+                }
+            }
+        },
+        {
+            name: '',
+            type: 'gauge',
+            min: 0,
+            max: 24,
+            startAngle: 90,
+            endAngle: 449.9,
+            radius: '72%',
+            splitNumber: 24,
+            clockwise: false,
+            animation: false,
+            detail: {
+                formatter: '{value}',
+                textStyle: {
+                    color: '#63869e'
+                }
+            },
+            detail:{
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                lineStyle: {
+                    color: [
+                        [1, '#E8E8E8']
+                    ],
+                    width: '10%',
+                    opacity:0.8
+                }
+            },
+            splitLine: {
+                show:true,
+                length: '92%',
+                lineStyle: {
+                    color: 'grey',
+                    width: '1'
+                }
+            },
+            axisLabel: {
+                show:false,
+                formatter: function(v){
+                    return v?v:'';
+                },
+                textStyle: {
+                    color: "#fb5310",
+                    fontWeight: 700
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: 'green',
+                    width: 2,
+                    borderWidth: 3,
+                }
+            }
+        }
+    ]
+};
+            var myChart = echarts.init(document.getElementById('numofhour'));
+            myChart.setOption(option);
+});
+</script>
+
+<script class="numofhourineverday">
+    var uploadedDataURL = "{% static "data/numMesOfHour_Everday_04.json"%}";
+
+    $.getJSON(uploadedDataURL,function (data) {
+
+    var hours = ['0', '2', '4', '6', '8', '10', '12',
+        '14', '16', '18','20','22',];
+    var days = ['2/23', '2/24', '2/25',
+        '2/26', '2/27', '2/28'];
+    var days4 = ['4/1', '4/2', '4/3','4/4','4/5','4/6','4/7','4/8','4/9',
+        '4/10','4/11','4/12','4/13','4/14','4/15','4/16','4/17','4/18',
+        '4/19','4/20','4/21','4/22','4/3','4/4','4/25', '4/26'];
+    data = data.map(function (item) {
+        return [item[0], item[1], item[2]/1000 || '-'];
+    });
+
+        option = {
+{#            backgroundColor: '#404a59',#}
+            title : {
+                text: '受伪基站感染数目',
+                x:'center',
+
+            },
+            tooltip: {
+                position: 'top'
+            },
+            animation: false,
+            grid: {
+                top:60,
+                height: '50%',
+                y: '10%'
+            },
+            xAxis: {
+                type: 'category',
+                data: days4,
+                splitArea: {
+                    show: true
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: hours,
+                splitArea: {
+                    show: true
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 100,
+                    top:25
+                },
+                {
+                    type: 'slider',
+                    show: true,
+                    yAxisIndex: [0],
+                    left: '93%',
+                    start: 1,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    yAxisIndex: [0],
+                    start: 1,
+                    end: 100
+                }
+            ],
+            visualMap: {
+                min: 0,
+                max: 15,
+                calculable: true,
+                left: 'left',
+                bottom: '15%',
+                textStyle: {
+                    color: '#000'
+                }
+            },
+            series: [{
+                name: 'Punch Card',
+                type: 'heatmap',
+                data: data,
+                label: {
+                    normal: {
+                        show: true
+                    }
+                },
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }]
+        };
+            var myChart = echarts.init(document.getElementById('numofhourineverday'));
+            myChart.setOption(option);
+    })
+</script>
+
+</html>

@@ -1,0 +1,127 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECharts map Demo</title>
+</head>
+<body>
+
+<div id="main" style="height: 500px;">
+    <!-- 这里以后是地图 -->
+</div>
+
+</body>
+<script src="{% static "js/echarts.js" %}"></script>
+<script src="{% static "js/bmap.min.js" %}"></script>
+<script src="{% static "js/jquery-3.2.1/jquery-3.2.1.js" %}" type="text/javascript"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=53oVIOgmSIejwV7EfphPgTynOZbIiVYu"></script>
+<script>
+    var uploadedDataURL = "{% static "data/numMesOfHour_Everday_04.json"%}";
+
+    $.getJSON(uploadedDataURL,function (data) {
+
+    var hours = ['0', '2', '4', '6', '8', '10', '12',
+        '14', '16', '18','20','22',];
+    var days = ['2/23', '2/24', '2/25',
+        '2/26', '2/27', '2/28'];
+    var days4 = ['4/1', '4/2', '4/3','4/4','4/5','4/6','4/7','4/8','4/9',
+        '4/10','4/11','4/12','4/13','4/14','4/15','4/16','4/17','4/18',
+        '4/19','4/20','4/21','4/22','4/3','4/4','4/25', '4/26'];
+    data = data.map(function (item) {
+        return [item[0], item[1], item[2]/1000 || '-'];
+    });
+
+        option = {
+{#            backgroundColor: '#404a59',#}
+            title : {
+                text: '受伪基站感染数',
+                x:'center',
+
+            },
+            tooltip: {
+                position: 'top'
+            },
+            animation: false,
+            grid: {
+                top:60,
+                height: '50%',
+                y: '10%'
+            },
+            xAxis: {
+                type: 'category',
+                data: days4,
+                splitArea: {
+                    show: true
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: hours,
+                splitArea: {
+                    show: true
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 100,
+                    top:25
+                },
+                {
+                    type: 'slider',
+                    show: true,
+                    yAxisIndex: [0],
+                    left: '93%',
+                    start: 1,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    yAxisIndex: [0],
+                    start: 1,
+                    end: 100
+                }
+            ],
+            visualMap: {
+                min: 0,
+                max: 15,
+                calculable: true,
+                left: 'left',
+                bottom: '15%',
+                textStyle: {
+                    color: '#000'
+                }
+            },
+            series: [{
+                name: 'Punch Card',
+                type: 'heatmap',
+                data: data,
+                label: {
+                    normal: {
+                        show: true
+                    }
+                },
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }]
+        };
+            var myChart = echarts.init(document.getElementById('main'));
+            myChart.setOption(option);
+    })
+</script>
+
+</html>

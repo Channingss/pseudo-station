@@ -1,0 +1,74 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>信息分类可视化Demo</title>
+</head>
+<body>
+
+<div id="main" style="height: 800px; width: 100%">
+    <!-- 这里以后是图 -->
+</div>
+
+</body>
+<script src="{% static "js/echarts.js" %}"></script>
+<script src="{% static "js/jquery-3.2.1/jquery-3.2.1.js" %}" type="text/javascript"></script>
+<script>
+
+    option = {
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:['房地产广告','假证件','发票','色情','金融']
+    },
+    series: [
+        {
+            name:'访问来源',
+            type:'pie',
+            selectedMode: 'single',
+            radius: [0, '30%'],
+
+            label: {
+                normal: {
+                    position: 'inner'
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:[
+                {value:8176, name:'临界的', selected:true},
+                {value:106301, name:'危险的'},
+                {value:29643, name:'破坏性的'}
+            ]
+        },
+        {
+            name:'访问来源',
+            type:'pie',
+            radius: ['40%', '55%'],
+
+            data:[
+                {value:3013, name:'房地产广告'},
+                {value:5163, name:'假证件'},
+                {value:83515, name:'发票'},
+                {value:22786, name:'色情'},
+                {value:29643, name:'金融'}
+
+            ]
+        }
+    ]
+};
+
+        var myChart = echarts.init(document.getElementById('main'));
+        myChart.setOption(option);
+
+</script>
+
+</html>
